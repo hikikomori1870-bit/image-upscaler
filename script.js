@@ -1,88 +1,76 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #e0f7fa;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
+const imageInput = document.getElementById('imageInput');
+const upscaleBtn = document.getElementById('upscaleBtn');
+const originalImg = document.getElementById('originalImg');
+const upscaledImg = document.getElementById('upscaledImg');
+const loading = document.getElementById('loading');
+const downloadBtn = document.getElementById('downloadBtn');
+const pica = window.pica();
+imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            originalImg.src = event.target.result;
+            upscaleBtn.disabled = false;
+            upscaledImg.src = "";
+            downloadBtn.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+function applySmartSharpen(ctx, width, height) {
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    const copy = new Uint8ClampedArray(data);
+    const weight = 0.5; 
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            for (let c = 0; c < 3; c++) { 
+                const i = (y * width + x) * 4 + c;
+                const top = ((y - 1) * width + x) * 4 + c;
+                const bottom = ((y + 1) * width + x) * 4 + c;
+                const left = (y * width + (x - 1)) * 4 + c;
+                const right = (y * width + (x + 1)) * 4 + c;
+                let val = copy[i] * (1 + 4 * weight) 
+                          - (copy[top] + copy[bottom] + copy[left] + copy[right]) * weight;
+                data[i] = val;
+            }
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
 }
-.container {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    width: 90%;
-    max-width: 900px;
-    text-align: center;
-}
-h1 { color: #00796b; margin-bottom: 5px; }
-.upload-section {
-    margin: 25px 0;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    align-items: center;
-}
-.btn-select {
-    background: #00acc1;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-}
-.btn-select:hover { background: #00838f; }
-input[type="file"] { display: none; }
-.btn-run {
-    background: #4caf50;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.btn-run:disabled { background: #ccc; cursor: not-allowed; }
-.btn-run:hover:not(:disabled) { background: #388e3c; }
-.result-section {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-.box { flex: 1; min-width: 300px; }
-.img-frame {
-    width: 100%;
-    min-height: 200px;
-    border: 2px dashed #b2dfdb;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-img { max-width: 100%; height: auto; }
-.btn-download {
-    display: inline-block;
-    margin-top: 15px;
-    background: #ff5722;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-}
-.hidden { display: none; }
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #00acc1;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: auto;
-}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+upscaleBtn.addEventListener('click', async () => {
+    loading.classList.remove('hidden');
+    upscaleBtn.disabled = true;
+    const fromCanvas = document.createElement('canvas');
+    const toCanvas = document.createElement('canvas');
+    const width = originalImg.naturalWidth;
+    const height = originalImg.naturalHeight;
+    fromCanvas.width = width;
+    fromCanvas.height = height;
+    toCanvas.width = width * 2;
+    toCanvas.height = height * 2;
+    const ctxFrom = fromCanvas.getContext('2d');
+    ctxFrom.drawImage(originalImg, 0, 0);
+    const ctxTo = toCanvas.getContext('2d');
+    try {
+        await pica.resize(fromCanvas, toCanvas, {
+            unsharpAmount: 160,
+            unsharpRadius: 0.5,
+            unsharpThreshold: 1
+        });
+        applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);
+        ctxTo.filter = "contrast(1.1) saturate(1.1) brightness(1.02)";
+        ctxTo.drawImage(toCanvas, 0, 0);
+        const resultUrl = toCanvas.toDataURL('image/png', 1.0);
+        upscaledImg.src = resultUrl;
+        downloadBtn.href = resultUrl;
+        downloadBtn.download = "anh-hd-sieu-net.png";
+        downloadBtn.classList.remove('hidden');
+    } catch (err) {
+        alert("Lỗi: " + err.message);
+    } finally {
+        loading.classList.add('hidden');
+        upscaleBtn.disabled = false;
+    }
+});
