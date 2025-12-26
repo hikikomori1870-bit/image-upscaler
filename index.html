@@ -1,53 +1,43 @@
-const coreProcessor = new Upscaler(); 
-const fileInput = document.getElementById('imageInput');
-const runBtn = document.getElementById('processBtn');
-const inputImg = document.getElementById('inputPreview');
-const outputImg = document.getElementById('outputResult');
-const loader = document.getElementById('loading');
-const saveLink = document.getElementById('downloadBtn');
-const engineMsg = document.getElementById('engine-status');
-const statusText = document.getElementById('status-text');
-coreProcessor.getModel().then(() => {
-    engineMsg.innerText = "Hệ thống: Đã kích hoạt thuật toán Render.";
-    engineMsg.style.color = "#a1c4fd";
-});
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            inputImg.src = event.target.result;
-            runBtn.disabled = false;
-            outputImg.classList.add('hidden');
-            saveLink.classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-});
-runBtn.addEventListener('click', async () => {
-    loader.classList.remove('hidden');
-    outputImg.classList.add('hidden');
-    runBtn.disabled = true;
-
-    try {
-        const renderedData = await coreProcessor.upscale(inputImg.src, {
-            patchSize: 64,
-            padding: 5,
-            progress: (p) => {
-                const percent = Math.round(p * 100);
-                statusText.innerText = `Đang tái cấu trúc: ${percent}%`;
-            }
-        });
-        outputImg.src = renderedData;
-        outputImg.classList.remove('hidden');
-        
-        saveLink.href = renderedData;
-        saveLink.download = "PhotoSharper_Enhanced.png";
-        saveLink.classList.remove('hidden');
-    } catch (err) {
-        alert("Lỗi xử lý: Dữ liệu hình ảnh không phù hợp với thuật toán.");
-    } finally {
-        loader.classList.add('hidden');
-        runBtn.disabled = false;
-    }
-});
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoSharper - Ultra HD Engine</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>PhotoSharper <span>v2.0</span></h1>
+        <p id="engine-status" style="font-size: 0.8em; color: #ff85a2; margin-bottom: 10px; opacity: 0.7;">
+            Đang khởi tạo thuật toán...
+        </p>
+        <div class="upload-section">
+            <label for="imageInput" class="custom-file-upload">
+                📂 Chọn tệp hình ảnh
+            </label>
+            <input type="file" id="imageInput" accept="image/*">
+            <button id="processBtn" disabled>Nâng cấp độ phân giải</button>
+        </div>
+        <div class="result-section">
+            <div class="box">
+                <h3>Dữ liệu gốc</h3>
+                <img id="inputPreview" src="" alt="">
+            </div>
+            <div class="box">
+                <h3>Tái cấu trúc Ultra HD</h3>
+                <div id="loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p id="status-text" style="font-size: 0.8em;">Đang tính toán pixel...</p>
+                </div>
+                <img id="outputResult" src="" alt="">
+                <br>
+                <a id="downloadBtn" class="hidden">Xuất file chất lượng cao</a>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
