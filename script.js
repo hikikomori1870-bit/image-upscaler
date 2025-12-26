@@ -53,7 +53,6 @@ upscaleBtn.addEventListener('click', async () => {
     const ctxFrom = fromCanvas.getContext('2d');
     ctxFrom.drawImage(originalImg, 0, 0);
     const ctxTo = toCanvas.getContext('2d');
-
     try {
         await pica.resize(fromCanvas, toCanvas, {
             unsharpAmount: 160,
@@ -61,12 +60,13 @@ upscaleBtn.addEventListener('click', async () => {
             unsharpThreshold: 1
         });
         applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);
+        
         ctxTo.filter = "contrast(1.1) saturate(1.1) brightness(1.02)";
         ctxTo.drawImage(toCanvas, 0, 0);
-        const resultUrl = toCanvas.toDataURL('image/png', 1.0);
+        const resultUrl = toCanvas.toDataURL('image/jpeg', 0.9);
         upscaledImg.src = resultUrl;
         downloadBtn.href = resultUrl;
-        downloadBtn.download = "anh-hd.png";
+        downloadBtn.download = "anh-sac-net-nhe.jpg";
         downloadBtn.classList.remove('hidden');
     } catch (err) {
         alert("Lỗi: " + err.message);
