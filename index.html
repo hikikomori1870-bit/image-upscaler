@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoSharper - Ultra HD Engine</title>
+    <title>Photo Sharper Pro</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pica/dist/pica.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>PhotoSharper <span>v2.0</span></h1>
-        <p id="engine-status" style="font-size: 0.8em; color: #ff85a2; margin-bottom: 10px; opacity: 0.7;">
-            Đang khởi tạo thuật toán...
-        </p>
+        <h1>✨ Photo Sharper Pro</h1>
+        <p>Làm nét ảnh tức thì</p>  
         <div class="upload-section">
-            <label for="imageInput" class="custom-file-upload">
-                📂 Chọn tệp hình ảnh
-            </label>
+            <label for="imageInput" class="btn-select">📁 Chọn ảnh từ máy</label>
             <input type="file" id="imageInput" accept="image/*">
-            <button id="processBtn" disabled>Nâng cấp độ phân giải</button>
+            <button id="upscaleBtn" class="btn-run" disabled>🚀 Bắt đầu làm nét</button>
         </div>
         <div class="result-section">
             <div class="box">
-                <h3>Dữ liệu gốc</h3>
-                <img id="inputPreview" src="" alt="">
+                <h3>Ảnh gốc</h3>
+                <div class="img-frame">
+                    <img id="originalImg" src="" alt="Chưa có ảnh">
+                </div>
             </div>
             <div class="box">
-                <h3>Tái cấu trúc Ultra HD</h3>
+                <h3>Ảnh kết quả</h3>
                 <div id="loading" class="hidden">
                     <div class="spinner"></div>
-                    <p id="status-text" style="font-size: 0.8em;">Đang tính toán pixel...</p>
+                    <p>Đang xử lý...</p>
                 </div>
-                <img id="outputResult" src="" alt="">
+                <div class="img-frame">
+                    <img id="upscaledImg" src="" alt="">
+                </div>
                 <br>
-                <a id="downloadBtn" class="hidden">Xuất file chất lượng cao</a>
+                <a id="downloadBtn" class="btn-download hidden">📥 Tải ảnh về máy</a>
             </div>
         </div>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
