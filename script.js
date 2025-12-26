@@ -1,43 +1,57 @@
-console.log("Script đã tải thành công!");
+const MODEL_CONFIG = {
+  model: 'espcann', 
+  size: 'x2'        
+};
+const upscaler = new Upscaler({
+  model: {
+    path: 'https://cdn.jsdelivr.net/npm/@upscalerjs/models@latest/models/espcann/x2/model.json',
+    scale: 2
+  }
+});
 const imageInput = document.getElementById('imageInput');
 const upscaleBtn = document.getElementById('upscaleBtn');
 const originalImg = document.getElementById('originalImg');
 const upscaledImg = document.getElementById('upscaledImg');
 const loading = document.getElementById('loading');
 const downloadBtn = document.getElementById('downloadBtn');
-const upscaler = new Upscaler();
 imageInput.addEventListener('change', (e) => {
-    console.log("Đã chọn file!"); 
-    const file = e.target.files[0];   
+    const file = e.target.files[0];
     if (file) {
-        const reader = new FileReader();       
+        const reader = new FileReader();
         reader.onload = (event) => {
-            console.log("Đã đọc file xong, đang hiển thị preview...");
             originalImg.src = event.target.result;
             upscaleBtn.disabled = false;
             upscaledImg.src = "";
             downloadBtn.classList.add('hidden');
         };
-        reader.onerror = (err) => {
-            console.error("Lỗi FileReader:", err);
-        };
         reader.readAsDataURL(file);
     }
 });
 upscaleBtn.addEventListener('click', async () => {
-    console.log("Bắt đầu xử lý AI...");
+    if (originalImg.naturalWidth > 1500 || originalImg.naturalHeight > 1500) {
+        alert("Ảnh này có kích thước pixel quá lớn.");
+        return;
+    }
     loading.classList.remove('hidden');
     upscaleBtn.disabled = true;
+    upscaledImg.src = "";
     try {
-        const upscaledSrc = await upscaler.upscale(originalImg.src);
-        console.log("Xử lý AI thành công!");
+        console.log("Đang bắt đầu xử lý...");
+        const upscaledSrc = await upscaler.upscale(originalImg.src, {
+            patchSize: 64, 
+            padding: 2,
+            progress: (percent) => {
+                console.log(`Đang xử lý: ${Math.round(percent * 100)}%`);
+            }
+        });
         upscaledImg.src = upscaledSrc;
         downloadBtn.href = upscaledSrc;
-        downloadBtn.download = "anh-net-cang.png";
+        downloadBtn.download = "anh-da-lam-net.png";
         downloadBtn.classList.remove('hidden');
+        console.log("Thành công!");
     } catch (error) {
-        console.error("Lỗi AI:", error);
-        alert("Có lỗi khi xử lý ảnh bằng AI. Hãy thử ảnh khác nhẹ hơn.");
+        console.error("Lỗi hệ thống:", error);
+        alert("Lỗi: " + error.message + "\n\nHướng dẫn: Bạn hãy thử nhấn F12, chọn tab Console để xem dòng chữ đỏ báo lỗi gì nhé.");
     } finally {
         loading.classList.add('hidden');
         upscaleBtn.disabled = false;
