@@ -1,25 +1,11 @@
-const originalImg = document.getElementById('originalImg');
+const imageInput = document.getElementById('imageInput');
 const upscaleBtn = document.getElementById('upscaleBtn');
+const originalImg = document.getElementById('originalImg');
 const upscaledImg = document.getElementById('upscaledImg');
 const loading = document.getElementById('loading');
 const downloadBtn = document.getElementById('downloadBtn');
-let model;
-async function loadModel() {
-    console.log("Đang tải mô hình...");
-    try {
-        model = new Upscaler({
-            model: {
-                path: 'https://cdn.jsdelivr.net/npm/@upscalerjs/models@latest/models/espcann/x2/model.json',
-                scale: 2
-            }
-        });
-        console.log("Mô hình đã sẵn sàng!");
-    } catch (e) {
-        console.error("Không tải được mô hình:", e);
-    }
-}
-loadModel();
-document.getElementById('imageInput').addEventListener('change', function(e) {
+const pica = Pica();
+imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
@@ -31,25 +17,29 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     }
 });
 upscaleBtn.addEventListener('click', async () => {
-    if (!model) {
-        alert("Mô hình vẫn đang tải, vui lòng đợi vài giây!");
-        return;
-    }
     loading.classList.remove('hidden');
     upscaleBtn.disabled = true;
-
+    const offScreenCanvas = document.createElement('canvas');
+    const targetWidth = originalImg.naturalWidth * 2; // Phóng to 2 lần
+    const targetHeight = originalImg.naturalHeight * 2;
+    offScreenCanvas.width = targetWidth;
+    offScreenCanvas.height = targetHeight;
     try {
-        const result = await model.upscale(originalImg.src, {
-            patchSize: 48, // Chia ảnh thành các ô nhỏ 48x48 pixel để xử lý
-            padding: 2
+        await pica.resize(originalImg, offScreenCanvas, {
+            unsharpAmount: 80,
+            unsharpRadius: 0.6,
+            unsharpThreshold: 2
         });
-        upscaledImg.src = result;
-        downloadBtn.href = result;
-        downloadBtn.download = "ket-qua-net-cang.png";
+        const ctx = offScreenCanvas.getContext('2d');
+        const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+        const resultUrl = offScreenCanvas.toDataURL('image/png');
+        upscaledImg.src = resultUrl;
+        downloadBtn.href = resultUrl;
+        downloadBtn.download = "anh-phong-to.png";
         downloadBtn.classList.remove('hidden');
     } catch (err) {
-        console.error("Lỗi:", err);
-        alert("Lỗi: " + err.message);
+        console.error(err);
+        alert("Có lỗi xảy ra khi xử lý ảnh.");
     } finally {
         loading.classList.add('hidden');
         upscaleBtn.disabled = false;
