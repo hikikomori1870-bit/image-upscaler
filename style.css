@@ -1,165 +1,124 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+:root {
+    --pink-pastel: #ffdee9;
+    --blue-pastel: #b5fffc;
+    --main-gradient: linear-gradient(135deg, #ffdee9 0%, #b5fffc 100%);
+    --btn-gradient: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+    --blue-gradient: linear-gradient(45deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+* { box-sizing: border-box; }
 body {
     font-family: 'Quicksand', sans-serif;
-    /* Gradient chuyển động lấp lánh cho nền */
-    background: linear-gradient(-45deg, #ffdee9, #b5fffc, #ffffff, #ffc2e2);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    color: #5d5d5d;
-    min-height: 100vh;
+    background: var(--main-gradient);
+    background-attachment: fixed;
     margin: 0;
-    padding: 20px;
+    padding: 15px;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
     justify-content: center;
-}
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    align-items: center;
 }
 .container {
-    max-width: 900px;
-    width: 95%;
-    margin: auto;
-    /* Hiệu ứng Glassmorphism (Kính mờ) */
+    max-width: 1000px;
+    width: 100%;
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    padding: 40px;
     border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 30px;
     box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
-    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 h1 {
-    font-weight: 700;
     background: linear-gradient(to right, #ff7eb3, #7afcff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 30px;
-    font-size: 2.5em;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.05));
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
+.header p { color: #888; margin-bottom: 30px; }
 .upload-section {
-    margin: 30px 0;
     display: flex;
-    justify-content: center;
-    gap: 20px;
     flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+.custom-file-upload, .btn-run {
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
 }
 .custom-file-upload {
-    display: inline-block;
-    padding: 12px 25px;
-    cursor: pointer;
     background: white;
     color: #ff85a2;
-    border-radius: 50px;
     border: 2px dashed #ffb6c1;
-    transition: all 0.3s ease;
-    font-weight: 600;
 }
-.custom-file-upload:hover {
-    background: #fff0f5;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 182, 193, 0.3);
-}
-input[type="file"] { display: none; }
-button {
-    position: relative;
-    overflow: hidden;
-    padding: 12px 30px;
-    background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+.btn-run {
+    background: var(--btn-gradient);
     color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+    box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
 }
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
-}
-button::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -60%;
-    width: 20%;
-    height: 200%;
-    background: rgba(255, 255, 255, 0.4);
-    transform: rotate(30deg);
-    transition: all 0.5s;
-}
-button:hover::after {
-    left: 120%;
-}
-button:disabled {
-    background: #e0e0e0;
-    cursor: not-allowed;
-    transform: none;
+.btn-run:disabled {
+    background: #ccc;
     box-shadow: none;
+    cursor: not-allowed;
 }
 .result-section {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 20px;
-    margin-top: 40px;
 }
 .box {
     flex: 1;
-    min-width: 280px;
+    min-width: 300px;
     background: rgba(255, 255, 255, 0.5);
-    padding: 15px;
+    padding: 20px;
     border-radius: 20px;
     border: 1px solid white;
 }
-.box h3 {
-    color: #88a9ff;
-    font-size: 1.1em;
-    margin-bottom: 15px;
+.img-frame {
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fdfdfd;
+    border-radius: 15px;
+    overflow: hidden;
 }
 img {
     max-width: 100%;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    border: 5px solid white;
-    transition: transform 0.3s ease;
-}
-img:hover {
-    transform: scale(1.02);
+    height: auto;
+    border-radius: 10px;
 }
 .spinner {
     border: 4px solid rgba(255, 182, 193, 0.3);
     border-top: 4px solid #ff85a2;
     border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
     margin: 20px auto;
 }
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-#downloadBtn {
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.btn-download {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 15px;
     padding: 12px 25px;
-    background: linear-gradient(45deg, #a1c4fd 0%, #c2e9fb 100%);
+    background: var(--blue-gradient);
     color: #4a6fa5;
     text-decoration: none;
-    font-weight: bold;
     border-radius: 50px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(161, 196, 253, 0.4);
-}
-#downloadBtn:hover {
-    background: linear-gradient(45deg, #c2e9fb 0%, #a1c4fd 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(161, 196, 253, 0.6);
+    font-weight: 700;
+    transition: 0.3s;
 }
 .hidden { display: none; }
+@media (max-width: 600px) {
+    .container { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+    .box { min-width: 100%; }
+    .upload-section { flex-direction: column; }
+}
