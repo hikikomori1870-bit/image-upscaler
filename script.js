@@ -13,6 +13,7 @@ imageInput.addEventListener('change', (e) => {
             originalImg.src = event.target.result;
             upscaleBtn.disabled = false;
             upscaledImg.src = "";
+            upscaledImg.classList.add('hidden');
             downloadBtn.classList.add('hidden');
         };
         reader.readAsDataURL(file);
@@ -40,10 +41,12 @@ function applySmartSharpen(ctx, width, height) {
     ctx.putImageData(imageData, 0, 0);
 }
 upscaleBtn.addEventListener('click', async () => {
+    if (!originalImg.src) return;    
     loading.classList.remove('hidden');
+    upscaledImg.classList.add('hidden');
     upscaleBtn.disabled = true;
     const fromCanvas = document.createElement('canvas');
-    const toCanvas = document.createElement('canvas');
+    const toCanvas = document.createElement('canvas');    
     const width = originalImg.naturalWidth;
     const height = originalImg.naturalHeight;
     fromCanvas.width = width;
@@ -52,23 +55,24 @@ upscaleBtn.addEventListener('click', async () => {
     toCanvas.height = height * 2;
     const ctxFrom = fromCanvas.getContext('2d');
     ctxFrom.drawImage(originalImg, 0, 0);
-    const ctxTo = toCanvas.getContext('2d');
     try {
         await pica.resize(fromCanvas, toCanvas, {
             unsharpAmount: 160,
             unsharpRadius: 0.5,
             unsharpThreshold: 1
         });
-        applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);
-        ctxTo.filter = "contrast(1.1) saturate(1.1) brightness(1.02)";
+        const ctxTo = toCanvas.getContext('2d');
+        applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);        
+        ctxTo.filter = "contrast(1.05) saturate(1.05)";
         ctxTo.drawImage(toCanvas, 0, 0);
         const resultUrl = toCanvas.toDataURL('image/png', 1.0);
         upscaledImg.src = resultUrl;
+        upscaledImg.classList.remove('hidden');        
         downloadBtn.href = resultUrl;
-        downloadBtn.download = "anh-hd-sieu-net.png";
+        downloadBtn.download = "photo_pro_sharpen.png";
         downloadBtn.classList.remove('hidden');
     } catch (err) {
-        alert("Lỗi: " + err.message);
+        alert("Có lỗi nhỏ: " + err.message);
     } finally {
         loading.classList.add('hidden');
         upscaleBtn.disabled = false;
