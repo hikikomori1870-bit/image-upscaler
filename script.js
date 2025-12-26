@@ -4,7 +4,7 @@ const originalImg = document.getElementById('originalImg');
 const upscaledImg = document.getElementById('upscaledImg');
 const loading = document.getElementById('loading');
 const downloadBtn = document.getElementById('downloadBtn');
-const pica = Pica();
+const pica = window.pica();
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -19,27 +19,30 @@ imageInput.addEventListener('change', (e) => {
 upscaleBtn.addEventListener('click', async () => {
     loading.classList.remove('hidden');
     upscaleBtn.disabled = true;
-    const offScreenCanvas = document.createElement('canvas');
-    const targetWidth = originalImg.naturalWidth * 2; // Phóng to 2 lần
-    const targetHeight = originalImg.naturalHeight * 2;
-    offScreenCanvas.width = targetWidth;
-    offScreenCanvas.height = targetHeight;
+    const fromCanvas = document.createElement('canvas');
+    const toCanvas = document.createElement('canvas');
+    const width = originalImg.naturalWidth;
+    const height = originalImg.naturalHeight;
+    fromCanvas.width = width;
+    fromCanvas.height = height;
+    toCanvas.width = width * 2;
+    toCanvas.height = height * 2;
+    const ctx = fromCanvas.getContext('2d');
+    ctx.drawImage(originalImg, 0, 0);
     try {
-        await pica.resize(originalImg, offScreenCanvas, {
-            unsharpAmount: 80,
-            unsharpRadius: 0.6,
-            unsharpThreshold: 2
+        await pica.resize(fromCanvas, toCanvas, {
+            unsharpAmount: 100,
+            unsharpRadius: 0.8,
+            unsharpThreshold: 0
         });
-        const ctx = offScreenCanvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
-        const resultUrl = offScreenCanvas.toDataURL('image/png');
+        const resultUrl = toCanvas.toDataURL('image/png');
         upscaledImg.src = resultUrl;
         downloadBtn.href = resultUrl;
-        downloadBtn.download = "anh-phong-to.png";
-        downloadBtn.classList.remove('hidden');
+        downloadBtn.download = "anh-lam-net.png";
+        downloadBtn.classList.remove('hidden');        
     } catch (err) {
         console.error(err);
-        alert("Có lỗi xảy ra khi xử lý ảnh.");
+        alert("Lỗi xử lý ảnh!");
     } finally {
         loading.classList.add('hidden');
         upscaleBtn.disabled = false;
