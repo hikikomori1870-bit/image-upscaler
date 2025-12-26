@@ -1,76 +1,52 @@
-const imageInput = document.getElementById('imageInput');
-const upscaleBtn = document.getElementById('upscaleBtn');
-const originalImg = document.getElementById('originalImg');
-const upscaledImg = document.getElementById('upscaledImg');
-const loading = document.getElementById('loading');
-const downloadBtn = document.getElementById('downloadBtn');
-const pica = window.pica();
-imageInput.addEventListener('change', (e) => {
+const coreProcessor = new Upscaler(); 
+const fileInput = document.getElementById('imageInput');
+const runBtn = document.getElementById('processBtn');
+const inputImg = document.getElementById('inputPreview');
+const outputImg = document.getElementById('outputResult');
+const loader = document.getElementById('loading');
+const saveLink = document.getElementById('downloadBtn');
+const engineMsg = document.getElementById('engine-status');
+const statusText = document.getElementById('status-text');
+coreProcessor.getModel().then(() => {
+    engineMsg.innerText = "Hệ thống: Đã kích hoạt thuật toán.";
+    engineMsg.style.color = "#a1c4fd";
+});
+fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
-            originalImg.src = event.target.result;
-            upscaleBtn.disabled = false;
-            upscaledImg.src = "";
-            downloadBtn.classList.add('hidden');
+            inputImg.src = event.target.result;
+            runBtn.disabled = false;
+            outputImg.classList.add('hidden');
+            saveLink.classList.add('hidden');
         };
         reader.readAsDataURL(file);
     }
 });
-function applySmartSharpen(ctx, width, height) {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    const copy = new Uint8ClampedArray(data);
-    const weight = 0.5; 
-    for (let y = 1; y < height - 1; y++) {
-        for (let x = 1; x < width - 1; x++) {
-            for (let c = 0; c < 3; c++) { 
-                const i = (y * width + x) * 4 + c;
-                const top = ((y - 1) * width + x) * 4 + c;
-                const bottom = ((y + 1) * width + x) * 4 + c;
-                const left = (y * width + (x - 1)) * 4 + c;
-                const right = (y * width + (x + 1)) * 4 + c;
-                let val = copy[i] * (1 + 4 * weight) 
-                          - (copy[top] + copy[bottom] + copy[left] + copy[right]) * weight;
-                data[i] = val;
-            }
-        }
-    }
-    ctx.putImageData(imageData, 0, 0);
-}
-upscaleBtn.addEventListener('click', async () => {
-    loading.classList.remove('hidden');
-    upscaleBtn.disabled = true;
-    const fromCanvas = document.createElement('canvas');
-    const toCanvas = document.createElement('canvas');
-    const width = originalImg.naturalWidth;
-    const height = originalImg.naturalHeight;
-    fromCanvas.width = width;
-    fromCanvas.height = height;
-    toCanvas.width = width * 2;
-    toCanvas.height = height * 2;
-    const ctxFrom = fromCanvas.getContext('2d');
-    ctxFrom.drawImage(originalImg, 0, 0);
-    const ctxTo = toCanvas.getContext('2d');
+runBtn.addEventListener('click', async () => {
+    loader.classList.remove('hidden');
+    outputImg.classList.add('hidden');
+    runBtn.disabled = true;
     try {
-        await pica.resize(fromCanvas, toCanvas, {
-            unsharpAmount: 160,
-            unsharpRadius: 0.5,
-            unsharpThreshold: 1
+        const renderedData = await coreProcessor.upscale(inputImg.src, {
+            patchSize: 64,
+            padding: 5,
+            progress: (p) => {
+                const percent = Math.round(p * 100);
+                statusText.innerText = `Đang tái cấu trúc: ${percent}%`;
+            }
         });
-        applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);
-        ctxTo.filter = "contrast(1.1) saturate(1.1) brightness(1.02)";
-        ctxTo.drawImage(toCanvas, 0, 0);
-        const resultUrl = toCanvas.toDataURL('image/png', 1.0);
-        upscaledImg.src = resultUrl;
-        downloadBtn.href = resultUrl;
-        downloadBtn.download = "anh-hd-sieu-net.png";
-        downloadBtn.classList.remove('hidden');
+        outputImg.src = renderedData;
+        outputImg.classList.remove('hidden');        
+        saveLink.href = renderedData;
+        saveLink.download = "PhotoSharper_Enhanced.png";
+        saveLink.classList.remove('hidden');
+
     } catch (err) {
-        alert("Lỗi: " + err.message);
+        alert("Lỗi xử lý: Dữ liệu hình ảnh không phù hợp.");
     } finally {
-        loading.classList.add('hidden');
-        upscaleBtn.disabled = false;
+        loader.classList.add('hidden');
+        runBtn.disabled = false;
     }
 });
