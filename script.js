@@ -12,7 +12,7 @@ imageInput.addEventListener('change', (e) => {
         reader.onload = (event) => {
             originalImg.src = event.target.result;
             upscaleBtn.disabled = false;
-            upscaledImg.classList.add('hidden');
+            upscaledImg.src = "";
             downloadBtn.classList.add('hidden');
         };
         reader.readAsDataURL(file);
@@ -22,7 +22,7 @@ function applySmartSharpen(ctx, width, height) {
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
     const copy = new Uint8ClampedArray(data);
-    const weight = 0.8;
+    const weight = 0.5; 
     for (let y = 1; y < height - 1; y++) {
         for (let x = 1; x < width - 1; x++) {
             for (let c = 0; c < 3; c++) { 
@@ -31,7 +31,6 @@ function applySmartSharpen(ctx, width, height) {
                 const bottom = ((y + 1) * width + x) * 4 + c;
                 const left = (y * width + (x - 1)) * 4 + c;
                 const right = (y * width + (x + 1)) * 4 + c;
-                
                 let val = copy[i] * (1 + 4 * weight) 
                           - (copy[top] + copy[bottom] + copy[left] + copy[right]) * weight;
                 data[i] = val;
@@ -41,9 +40,7 @@ function applySmartSharpen(ctx, width, height) {
     ctx.putImageData(imageData, 0, 0);
 }
 upscaleBtn.addEventListener('click', async () => {
-    if (!originalImg.src) return;
     loading.classList.remove('hidden');
-    upscaledImg.classList.add('hidden');
     upscaleBtn.disabled = true;
     const fromCanvas = document.createElement('canvas');
     const toCanvas = document.createElement('canvas');
@@ -55,28 +52,24 @@ upscaleBtn.addEventListener('click', async () => {
     toCanvas.height = height * 2;
     const ctxFrom = fromCanvas.getContext('2d');
     ctxFrom.drawImage(originalImg, 0, 0);
+    const ctxTo = toCanvas.getContext('2d');
+
     try {
         await pica.resize(fromCanvas, toCanvas, {
-            unsharpAmount: 250, 
-            unsharpRadius: 0.6,
+            unsharpAmount: 160,
+            unsharpRadius: 0.5,
             unsharpThreshold: 1
         });
-        const ctxTo = toCanvas.getContext('2d');
         applySmartSharpen(ctxTo, toCanvas.width, toCanvas.height);
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = toCanvas.width;
-        tempCanvas.height = toCanvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.filter = "contrast(1.2) brightness(1.08) saturate(1.1)";
-        tempCtx.drawImage(toCanvas, 0, 0);
-        const resultUrl = tempCanvas.toDataURL('image/png', 1.0);
+        ctxTo.filter = "contrast(1.1) saturate(1.1) brightness(1.02)";
+        ctxTo.drawImage(toCanvas, 0, 0);
+        const resultUrl = toCanvas.toDataURL('image/png', 1.0);
         upscaledImg.src = resultUrl;
-        upscaledImg.classList.remove('hidden');
         downloadBtn.href = resultUrl;
-        downloadBtn.download = "photo_ultra_hd.png";
+        downloadBtn.download = "anh-hd.png";
         downloadBtn.classList.remove('hidden');
     } catch (err) {
-        alert("Lỗi xử lý: " + err.message);
+        alert("Lỗi: " + err.message);
     } finally {
         loading.classList.add('hidden');
         upscaleBtn.disabled = false;
