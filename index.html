@@ -3,37 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Sharper Pro</title>
+    <title>Photo Sharper ✨</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Thêm font chữ cute -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/pica/dist/pica.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>✨ Photo Sharper Pro</h1>
-        <p>Làm nét ảnh tức thì</p>  
+        <div class="header">
+            <h1>✨ Photo Sharper ✨</h1>
+            <p>Phép màu làm nét ảnh chỉ trong tích tắc</p>
+        </div>
         <div class="upload-section">
-            <label for="imageInput" class="btn-select">📁 Chọn ảnh từ máy</label>
-            <input type="file" id="imageInput" accept="image/*">
-            <button id="upscaleBtn" class="btn-run" disabled>🚀 Bắt đầu làm nét</button>
+            <label for="imageInput" class="custom-file-upload">
+                <span>📁 Chọn ảnh từ máy</span>
+            </label>
+            <input type="file" id="imageInput" accept="image/*">          
+            <button id="upscaleBtn" class="btn-run" disabled>
+                🚀 Bắt đầu làm nét
+            </button>
         </div>
         <div class="result-section">
             <div class="box">
-                <h3>Ảnh gốc</h3>
+                <h3>🖼️ Ảnh gốc</h3>
                 <div class="img-frame">
                     <img id="originalImg" src="" alt="Chưa có ảnh">
                 </div>
             </div>
             <div class="box">
-                <h3>Ảnh kết quả</h3>
+                <h3>💖 Ảnh kết quả</h3>
                 <div id="loading" class="hidden">
                     <div class="spinner"></div>
-                    <p>Đang xử lý...</p>
+                    <p class="loading-text">Đang dùng phép thuật...</p>
                 </div>
                 <div class="img-frame">
                     <img id="upscaledImg" src="" alt="">
                 </div>
-                <br>
-                <a id="downloadBtn" class="btn-download hidden">📥 Tải ảnh về máy</a>
+                <a id="downloadBtn" class="btn-download hidden">📥 Tải ảnh về</a>
             </div>
         </div>
     </div>
